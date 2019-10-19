@@ -1,0 +1,28 @@
+#!/bin/sh
+SELF=$(cd $(dirname $0); pwd)
+REPO_HOME=${SELF}/../
+
+THEME_USER='themefisher'
+THEME_NAME='dot-hugo-documentation-theme'
+
+function _init() {
+    echo ">> create hugo site"
+    docker run -v ${REPO_HOME}/:/site --rm -it nutsllc/toybox-hugo hugo new site site
+
+    echo ">> download ${THEME_NAME} theme"
+    cd site && git init && cd themes
+    git submodule add https://github.com/${THEME_USER}/${THEME_NAME}
+
+    echo ">> setup ${THEME_NAME} theme"
+    cp -r ${REPO_HOME}/site/themes/${THEME_NAME}/exampleSite/* ${REPO_HOME}/site
+    sed -i -e "s/\"dot\"/\"${THEME_NAME}\"/" ${REPO_HOME}/site/config.toml
+    cp -r ${REPO_HOME}/lib ${REPO_HOME}/site/bin
+}
+
+_init && {
+    echo "complete!"
+    echo "run site/bin/docker-compose.yml and open localhost:1313 on your browser."
+    echo "enjoy :-)"
+}
+
+exit 0;
